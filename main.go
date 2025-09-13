@@ -48,12 +48,15 @@ func DrawGraph(resolution int, fun func(x float32) float32, color rl.Color) {
 
 func main() {
 	var (
-		IsScriptError   bool  = false
-		GraphResolution int32 = 2
+		IsScriptError      bool  = false
+		GraphResolution    int32 = 2
+		GraphResolutionMin int32 = 1
+		GraphResolutionMax int32 = 20
 	)
 
 	// UI varible
 	var (
+		ResolutionStepValue       int32        = 1
 		ResolutionStepBoundingBox rl.Rectangle = rl.Rectangle{X: 100, Y: 220, Width: 70, Height: 30}
 		ResolutionStepFocus       bool         = false
 	)
@@ -134,7 +137,17 @@ func main() {
 			}
 		}
 
-		gui.ValueBox(ResolutionStepBoundingBox, "Resolution Step :", &GraphResolution, 1, 10, ResolutionStepFocus)
+		valueBoxUpdate := gui.ValueBox(
+			ResolutionStepBoundingBox,
+			"Resolution Step :",
+			&ResolutionStepValue,
+			int(GraphResolutionMin),
+			int(GraphResolutionMax),
+			ResolutionStepFocus,
+		)
+		if valueBoxUpdate {
+			GraphResolution = max(min(ResolutionStepValue, GraphResolutionMax), GraphResolutionMin)
+		}
 
 		rl.DrawFPS(10, 10)
 
