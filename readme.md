@@ -6,6 +6,6 @@ A simple graph Rendering program written in [go](https://go.dev/) using [raylib]
 
 **Todo :**
 - [x] Rendering graph
-- [x] - Lua scripting
-- [ ] - Support multiple graph
-- [ ] - Rewrite a rendering engine
+- [x] Lua scripting
+- [ ] Support multiple graph
+- [ ] Rewrite a rendering engine
