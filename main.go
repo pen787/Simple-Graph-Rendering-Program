@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	gui "github.com/gen2brain/raylib-go/raygui"
@@ -46,6 +47,8 @@ func DrawGraph(resolution int, fun func(x float32) float32, color rl.Color) {
 }
 
 func main() {
+	var IsScriptError bool = false
+
 	programArgs := os.Args[1:]
 	if len(programArgs) < 1 {
 		fmt.Printf("Usage : [path]\n")
@@ -57,7 +60,21 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	// Init a embled script
-	NewEmbledScript(programArgs[0])
+	embledScriptService := NewEmbledScript()
+	defer embledScriptService.Close()
+
+	fmt.Println(programArgs)
+	if err := embledScriptService.DoFile(programArgs[0]); err != nil {
+		log.Println("Error when script load : ")
+		fmt.Println(err)
+		IsScriptError = true
+	}
+
+	if err := embledScriptService.CallLoad(); err != nil {
+		log.Println("Script Load function error : ")
+		fmt.Println(err)
+		IsScriptError = true
+	}
 
 	for !rl.WindowShouldClose() {
 		// Update
@@ -69,9 +86,18 @@ func main() {
 
 		DrawGrid()
 
-		DrawGraph(2, func(x float32) float32 {
-			return x * x
-		}, rl.DarkGreen)
+		if !IsScriptError {
+			DrawGraph(2, func(x float32) float32 {
+				value, err := embledScriptService.CallRender(x)
+				if err != nil {
+					IsScriptError = true
+					log.Println("Script Render function error : ")
+					fmt.Print(err)
+				}
+
+				return value
+			}, rl.DarkGreen)
+		}
 
 		// UI
 
@@ -81,6 +107,11 @@ func main() {
 
 		gui.WindowBox(rl.Rectangle{X: 0, Y: 120, Width: 200, Height: 300}, "#63# Graph")
 		gui.Label(rl.Rectangle{X: 5, Y: 150, Width: 190, Height: 250}, "Hello")
+
+		click := gui.Button(rl.Rectangle{X: 5, Y: 150, Width: 100, Height: 30}, "Reset script")
+		if click {
+			embledScriptService.ResetScript()
+		}
 
 		rl.DrawFPS(10, 10)
 
