@@ -7,7 +7,7 @@ function load()
   return {R=red,G=green,B=blue} -- return color of a graph
 end
 
--- Run for each x cords
+-- Run for each x coordination
 function render(x)
   return 1/x
 end

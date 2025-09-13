@@ -2,12 +2,12 @@ module penrenderingmethod
 
 go 1.24.3
 
-require github.com/gen2brain/raylib-go/raylib v0.55.1
-
 require (
-	github.com/mlange-42/ark v0.5.1 // indirect
-	github.com/yuin/gopher-lua v1.1.1 // indirect
+	github.com/gen2brain/raylib-go/raylib v0.55.1
+	github.com/yuin/gopher-lua v1.1.1
 )
+
+require github.com/mlange-42/ark v0.5.1 // indirect
 
 require (
 	github.com/beorn7/floats v1.0.0 // indirect

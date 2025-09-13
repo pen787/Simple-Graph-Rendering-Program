@@ -5,7 +5,7 @@ function load()
   return {R=100,G=0,B=255}
 end
 
--- Run for each x cords
+-- Run for each x coordination
 function render(x)
   return x * x
 end
