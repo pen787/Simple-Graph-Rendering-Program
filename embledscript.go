@@ -1,9 +1,11 @@
 package main
 
 import (
+	"image/color"
 	"log"
 	"strconv"
 
+	rl "github.com/gen2brain/raylib-go/raylib"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -12,15 +14,36 @@ type EmbledScript struct {
 	path     string
 }
 
-func (es *EmbledScript) CallLoad() error {
+func (es *EmbledScript) CallLoad() (rl.Color, error) {
 	if err := es.LuaState.CallByParam(lua.P{
 		Fn:      es.LuaState.GetGlobal("load"),
-		NRet:    0,
+		NRet:    1,
 		Protect: true,
 	}); err != nil {
-		return err
+		return color.RGBA{}, err
 	}
-	return nil
+	ret := es.LuaState.Get(-1)
+
+	R := es.LuaState.GetTable(ret, lua.LString("R"))
+	RI, err := strconv.ParseInt(R.String(), 10, 16)
+	if err != nil {
+		return rl.Color{}, err
+	}
+
+	G := es.LuaState.GetTable(ret, lua.LString("G"))
+	GI, err := strconv.ParseInt(G.String(), 10, 16)
+	if err != nil {
+		return rl.Color{}, err
+	}
+	B := es.LuaState.GetTable(ret, lua.LString("B"))
+	BI, err := strconv.ParseInt(B.String(), 10, 16)
+	if err != nil {
+		return rl.Color{}, err
+	}
+
+	es.LuaState.Pop(1)
+
+	return rl.NewColor(uint8(RI), uint8(GI), uint8(BI), uint8(255)), nil
 }
 
 func (es *EmbledScript) CallRender(x float32) (float32, error) {
