@@ -9,7 +9,7 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-const StartWindowWidth, StartWindowHeight = 800., 450.
+const StartWindowWidth, StartWindowHeight = 1000., 600.
 
 var (
 	Zoom         float32    = 5
@@ -25,7 +25,7 @@ func DrawGrid() {
 }
 
 func DrawGraph(resolution int, fun func(x float32) float32, color rl.Color) {
-	resolution_step := resolution
+	resolution_step := max(resolution, 1)
 	points := make([]rl.Vector2, 0, rl.GetScreenWidth()/resolution_step)
 	for x := 0; x < rl.GetScreenWidth(); x += resolution_step {
 		xgpos := ScreenToGraphCords(rl.NewVector2(float32(x), 0))
@@ -47,7 +47,16 @@ func DrawGraph(resolution int, fun func(x float32) float32, color rl.Color) {
 }
 
 func main() {
-	var IsScriptError bool = false
+	var (
+		IsScriptError   bool  = false
+		GraphResolution int32 = 2
+	)
+
+	// UI varible
+	var (
+		ResolutionStepBoundingBox rl.Rectangle = rl.Rectangle{X: 100, Y: 220, Width: 70, Height: 30}
+		ResolutionStepFocus       bool         = false
+	)
 
 	programArgs := os.Args[1:]
 	if len(programArgs) < 1 {
@@ -63,7 +72,6 @@ func main() {
 	embledScriptService := NewEmbledScript()
 	defer embledScriptService.Close()
 
-	fmt.Println(programArgs)
 	if err := embledScriptService.DoFile(programArgs[0]); err != nil {
 		log.Println("Error when script load : ")
 		fmt.Println(err)
@@ -77,17 +85,26 @@ func main() {
 	}
 
 	for !rl.WindowShouldClose() {
-		// Update
+		//// [Update]
+		// UI
+		mousePos := rl.GetMousePosition()
+		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
+			if rl.CheckCollisionPointRec(mousePos, ResolutionStepBoundingBox) {
+				ResolutionStepFocus = true
+			} else {
+				ResolutionStepFocus = false
+			}
+		}
 
-		// Draw
+		//// [Draw]
 		rl.BeginDrawing()
-
 		rl.ClearBackground(rl.RayWhite)
 
+		// Graph
 		DrawGrid()
 
 		if !IsScriptError {
-			DrawGraph(2, func(x float32) float32 {
+			DrawGraph(int(GraphResolution), func(x float32) float32 {
 				value, err := embledScriptService.CallRender(x)
 				if err != nil {
 					IsScriptError = true
@@ -100,18 +117,24 @@ func main() {
 		}
 
 		// UI
-
 		gui.WindowBox(rl.Rectangle{X: 0, Y: 30, Width: 200, Height: 70}, "#44# Camera Control")
 		zoom_slider := gui.Slider(rl.Rectangle{X: 50, Y: 70, Width: 100, Height: 20}, "Zoom", "", Zoom, 0.1, 15)
 		Zoom = zoom_slider
 
 		gui.WindowBox(rl.Rectangle{X: 0, Y: 120, Width: 200, Height: 300}, "#63# Graph")
-		gui.Label(rl.Rectangle{X: 5, Y: 150, Width: 190, Height: 250}, "Hello")
+		gui.Label(rl.Rectangle{X: 5, Y: 160, Width: 170, Height: 30}, fmt.Sprintf("Script : %s", programArgs[0]))
 
-		click := gui.Button(rl.Rectangle{X: 5, Y: 150, Width: 100, Height: 30}, "Reset script")
+		click := gui.Button(rl.Rectangle{X: 50, Y: 185, Width: 100, Height: 30}, "Reset script")
 		if click {
 			embledScriptService.ResetScript()
+			if err := embledScriptService.CallLoad(); err != nil {
+				log.Println("Script Load function error : ")
+				fmt.Println(err)
+				IsScriptError = true
+			}
 		}
+
+		gui.ValueBox(ResolutionStepBoundingBox, "Resolution Step :", &GraphResolution, 1, 10, ResolutionStepFocus)
 
 		rl.DrawFPS(10, 10)
 
