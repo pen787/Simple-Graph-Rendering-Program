@@ -1,10 +1,10 @@
-package main
+package utility
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func GraphtoScreenCords(v1 rl.Vector2) rl.Vector2 {
+func GraphtoScreenCords(v1 rl.Vector2, CameraOrigin rl.Vector2, zoom float32) rl.Vector2 {
 	ww, wh := rl.GetScreenWidth(), rl.GetScreenHeight()
 	fww := float32(ww)
 	fwh := float32(wh)
@@ -13,12 +13,12 @@ func GraphtoScreenCords(v1 rl.Vector2) rl.Vector2 {
 
 	newVec := rl.NewVector2(v1.X, -v1.Y)
 	newVec = rl.Vector2Add(newVec, camCords)
-	newVec = rl.Vector2Scale(newVec, Zoom)
+	newVec = rl.Vector2Scale(newVec, zoom)
 	newVec = rl.Vector2Add(newVec, rl.NewVector2(fww/2, fwh/2))
 	return newVec
 }
 
-func ScreenToGraphCords(screenPos rl.Vector2) rl.Vector2 {
+func ScreenToGraphCords(screenPos rl.Vector2, CameraOrigin rl.Vector2, zoom float32) rl.Vector2 {
 	ww, wh := rl.GetScreenWidth(), rl.GetScreenHeight()
 	fww := float32(ww)
 	fwh := float32(wh)
@@ -27,14 +27,14 @@ func ScreenToGraphCords(screenPos rl.Vector2) rl.Vector2 {
 
 	centeredVec := rl.Vector2Subtract(screenPos, rl.NewVector2(fww/2, fwh/2))
 	cameraAdjustVec := rl.Vector2Subtract(centeredVec, camCords)
-	scaledVec := rl.Vector2Scale(cameraAdjustVec, 1.0/Zoom)
+	scaledVec := rl.Vector2Scale(cameraAdjustVec, 1.0/zoom)
 	graphVec := rl.NewVector2(scaledVec.X, -scaledVec.Y)
 
 	return graphVec
 }
 
-func GetScreenSizeGraphCords() rl.Vector2 {
+func GetScreenSizeGraphCords(CameraOrigin rl.Vector2, zoom float32) rl.Vector2 {
 	ww, wh := rl.GetScreenWidth(), rl.GetScreenHeight()
 
-	return ScreenToGraphCords(rl.NewVector2(float32(ww), float32(wh)))
+	return ScreenToGraphCords(rl.NewVector2(float32(ww), float32(wh)), CameraOrigin, zoom)
 }
