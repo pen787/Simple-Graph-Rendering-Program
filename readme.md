@@ -29,6 +29,7 @@ penrenderingmethod [script path]
 -- Uses for initialize varible.
 function load()
   -- run when script is loaded.
+  return {R=255, G=0, B=0}
 end
 
 -- Uses for render a graph.
