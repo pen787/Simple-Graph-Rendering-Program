@@ -1,6 +1,7 @@
 package components
 
 import (
+	"errors"
 	"image/color"
 	"log"
 	"strconv"
@@ -23,6 +24,9 @@ func (es *EmbledScript) CallLoad() (rl.Color, error) {
 		return color.RGBA{}, err
 	}
 	ret := es.LuaState.Get(-1)
+	if ret.Type().String() != "table" {
+		return rl.Color{}, errors.New("please return a table that contain RGB")
+	}
 
 	R := es.LuaState.GetTable(ret, lua.LString("R"))
 	RI, err := strconv.ParseInt(R.String(), 10, 16)
