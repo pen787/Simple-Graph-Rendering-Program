@@ -8,6 +8,7 @@ A simple graph Rendering program written in [go](https://go.dev/) using [raylib]
 **Todo :**
 - [x] Rendering graph
 - [x] Lua scripting
+- [ ] Rewrite everything to ECS
 - [ ] Support multiple graph
 - [ ] Rewrite a rendering engine
 
@@ -29,7 +30,7 @@ penrenderingmethod [script path]
 -- Uses for initialize varible.
 function load()
   -- run when script is loaded.
-  return {R=255, G=0, B=0}
+  return {R=255, G=0, B=0} -- Color of a graph
 end
 
 -- Uses for render a graph.
